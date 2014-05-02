@@ -236,15 +236,22 @@ void DDS_vInterrupcao(void)
 	GPIOB_BASE_PTR->PDOR |= (0x01 << 7);
 	
 	//para minimizar a latencia passamos os valores direto aos D/A:
+    
+    //Armazena temporariamente os dados de todos os GPIOS
+    //(freescale conseguiu deixar o acesso dos GPIO ainda pior
+    //do que o que ja era colocando tudo num registro só, assim precisamos
+    //mascarar o que nao e usado para nao prejudicar os outros GPIO)
 	dTemp = GPIOA_BASE_PTR->PDOR;
 	
+    
 	//Mascara dados:
 	dTemp &= 0xFF00FFFF;
 	
 	
-	//Transfere para o D/A:
+	//escala amplitude e transfere para o barramtno  do D/A:
 	dTemp |= (uint32_t)((awAmplitude[0] >> 4) << 16);
 	
+    //Escrita no bus propriamente:
 	GPIOA_BASE_PTR->PDOR = dTemp;
 	
 	
@@ -264,12 +271,11 @@ void DDS_vInterrupcao(void)
 			//Mascara valor:
 			axTblDDS[bCanal].dAcumulador &= 0x3FFFFFFF;
 			
-			//Escala valor para 8bits e extrai amplitude da tabela:
-			awAmplitude[bCanal] = awTblSeno[(axTblDDS[bCanal].dAcumulador >> 24)];
+			//Escala valor para 10bits e extrai amplitude da tabela:
+			awAmplitude[bCanal] = awTblSeno[(axTblDDS[bCanal].dAcumulador >> 22)];
 		}
 	}
 	
-	//Habilita nova contagem do timer
 	//Debug:
 	GPIOB_BASE_PTR->PDOR &= ~(0x01 << 7);
 
