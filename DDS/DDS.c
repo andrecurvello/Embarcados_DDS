@@ -243,7 +243,7 @@ void DDS_vInterrupcao(void)
 	
 	
 	//Transfere para o D/A:
-	dTemp |= awAmplitude[0] >> 4;
+	dTemp |= (uint32_t)((awAmplitude[0] >> 4) << 16);
 	
 	GPIOA_BASE_PTR->PDOR = dTemp;
 	
